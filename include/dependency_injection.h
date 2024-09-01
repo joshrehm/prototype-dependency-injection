@@ -124,10 +124,17 @@ namespace detail {
 template<typename T>
 inline static auto make_injected(container& container)
 {
+    // Use our instance_parameters helper to generate a tuple whose
+    // types are based on the specialzied make_instance parameters.
     using parameters_t = typename detail::instance_parameters<
         decltype(injectable_traits<T>::make_instance)>::parameter_tuple_t;
+
+    // Generate our tuple which will contain references to all dependant
+    // types.
     auto parameters = detail::get_dependencies<parameters_t>(
         container, std::make_index_sequence<std::tuple_size_v<parameters_t>>());
+
+    // Use std::apply to invoke make_instance with our tuple of parameters.
     return std::apply(injectable_traits<T>::make_instance, parameters);
 }
 
